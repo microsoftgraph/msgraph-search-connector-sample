@@ -7,7 +7,7 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/PartsInventoryConnector.csproj",
+                "${workspaceFolder}/PartsInventoryConnector/PartsInventoryConnector.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -19,7 +19,7 @@
             "type": "process",
             "args": [
                 "publish",
-                "${workspaceFolder}/PartsInventoryConnector.csproj",
+                "${workspaceFolder}/PartsInventoryConnector/PartsInventoryConnector.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
@@ -32,7 +32,7 @@
             "args": [
                 "watch",
                 "run",
-                "${workspaceFolder}/PartsInventoryConnector.csproj",
+                "${workspaceFolder}/PartsInventoryConnector/PartsInventoryConnector.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
