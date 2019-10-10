@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using PartsInventoryConnector.Authentication;
 using PartsInventoryConnector.Console;
+using System;
 using System.Net.Http;
 
 namespace PartsInventoryConnector
@@ -62,13 +63,31 @@ namespace PartsInventoryConnector
                         break;
                 }
 
+                Output.WriteLine("");
+
             } while (true);
 
         }
 
         private static MenuChoice DoMenuPrompt()
         {
-            return MenuChoice.Invalid;
+            Output.WriteLine(Output.Info, "Please choose one of the following options:");
+
+            Output.WriteLine($"{Convert.ToInt32(MenuChoice.CreateConnection)}. Create a connection");
+            Output.WriteLine($"{Convert.ToInt32(MenuChoice.ChooseExistingConnection)}. Select an existing connection");
+            Output.WriteLine($"{Convert.ToInt32(MenuChoice.ViewSchema)}. View schema for current connection");
+            Output.WriteLine($"{Convert.ToInt32(MenuChoice.PushItems)}. Push items to current connection");
+            Output.WriteLine($"{Convert.ToInt32(MenuChoice.Exit)}. Exit");
+
+            try
+            {
+                var choice = int.Parse(System.Console.ReadLine());
+                return (MenuChoice)choice;
+            }
+            catch (FormatException)
+            {
+                return MenuChoice.Invalid;
+            }
         }
 
         private static IConfigurationRoot LoadAppSettings()

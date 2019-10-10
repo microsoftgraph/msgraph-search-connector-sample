@@ -5,11 +5,11 @@ namespace PartsInventoryConnector.Console
 {
     public enum MenuChoice
     {
-        Invalid = -1,
-        Exit,
+        Invalid = 0,
         CreateConnection,
         ChooseExistingConnection,
         ViewSchema,
-        PushItems
+        PushItems,
+        Exit
     }
 }
