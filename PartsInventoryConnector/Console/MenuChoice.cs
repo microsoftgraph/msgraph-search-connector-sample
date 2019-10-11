@@ -8,6 +8,8 @@ namespace PartsInventoryConnector.Console
         Invalid = 0,
         CreateConnection,
         ChooseExistingConnection,
+        DeleteConnection,
+        RegisterSchema,
         ViewSchema,
         PushItems,
         Exit

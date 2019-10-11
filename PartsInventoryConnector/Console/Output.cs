@@ -1,5 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+using Newtonsoft.Json;
 using System;
 
 namespace PartsInventoryConnector.Console
@@ -57,6 +58,14 @@ namespace PartsInventoryConnector.Console
         {
             System.Console.ForegroundColor = color;
             System.Console.WriteLine(format, values);
+            System.Console.ResetColor();
+        }
+
+        public static void WriteObject(ConsoleColor color, object obj)
+        {
+            var serializedObject = JsonConvert.SerializeObject(obj, Formatting.Indented);
+            System.Console.ForegroundColor = color;
+            System.Console.WriteLine(serializedObject);
             System.Console.ResetColor();
         }
     }
