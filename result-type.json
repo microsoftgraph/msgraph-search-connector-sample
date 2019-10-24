@@ -1,0 +1,56 @@
+{
+  "type": "AdaptiveCard",
+  "version": "1.0",
+  "body": [
+    {
+      "type": "ColumnSet",
+      "columns": [
+        {
+          "type": "Column",
+          "width": 6,
+          "items": [
+            {
+              "type": "TextBlock",
+              "text": "__{name} (Part #{partNumber})__",
+              "color": "accent",
+              "size": "medium",
+              "spacing": "none",
+              "$when": "{name != \"\"}"
+            },
+            {
+              "type": "TextBlock",
+              "text": "{description}",
+              "wrap": true,
+              "maxLines": 3,
+              "$when": "{description != \"\"}"
+            }
+          ],
+          "horizontalAlignment": "Center",
+          "spacing": "none"
+        },
+        {
+          "type": "Column",
+          "width": 2,
+          "items": [
+            {
+              "type": "FactSet",
+              "facts": [
+                {
+                  "title": "Price",
+                  "value": "${price}"
+                },
+                {
+                  "title": "Current Inventory",
+                  "value": "{inventory} units"
+                }
+              ]
+            }
+          ],
+          "spacing": "none",
+          "horizontalAlignment": "Right"
+        }
+      ]
+    }
+  ],
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json"
+}

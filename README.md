@@ -1,2 +1,70 @@
-# msgraph-search-connector-sample
-[WIP] This .NET Core application shows how to use the Microsoft Graph indexing API to create a connection to the Microsoft Search service and index custom items.
+# Microsoft Graph Search Connector Sample
+
+This .NET Core application shows how to use the Microsoft Graph indexing API to create a connection to the Microsoft Search service and index custom items. The sample indexes appliance parts inventory for Contoso Appliance Repair.
+
+## Register an app in Azure portal
+
+In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
+
+1. Go to the [Azure Active Directory admin center](https://aad.portal.azure.com/) and sign in with an administrator account.
+1. Select **Azure Active Directory** in the left-hand pane, then select **App registrations** under **Manage**.
+1. Select **New registration**.
+1. Complete the **Register an application** form with the following values, then select **Register**.
+
+    - **Name:** `Parts Inventory Connector`
+    - **Supported account types:** `Accounts in this organizational directory only (Microsoft only - Single tenant)`
+    - **Redirect URI:** Leave blank
+
+1. On the **Parts Inventory Connector** page, copy the value of **Application (client) ID**. Replace the `YOUR_APP_ID_HERE` value in **appsettings.json** with the copied ID.
+1. Copy the value of **Directory (tenant) ID**. Replace the `YOUR_TENANT_ID_HERE` value in **appsettings.json** with the copied ID.
+1. Select **API Permissions** under **Manage**.
+1. Select **Add a permission**, then select **Microsoft Graph**.
+1. Select **Application permissions**, then select the **ExternalItem.ReadWrite.All** permission. Select **Add permissions**.
+1. Select **Grant admin consent for {TENANT}**, then select **Yes** when prompted.
+1. Select **Certificates & secrets** under **Manage**, then select **New client secret**.
+1. Enter a description and choose an expiration time for the secret, then select **Add**.
+1. Copy the new secret. Replace the `YOUR_APP_SECRET_HERE` value in **appsettings.json** with the copied secret.
+1. Select **Overview**
+
+## Run the app
+
+In this step you'll build and run the sample. This will create a new connection, register the schema, then push items from the [ApplianceParts.csv](ApplianceParts.csv) file into the connection.
+
+1. Open your command-line interface (CLI) in the **PartsInventoryConnector** directory.
+1. Use the `dotnet build` command to build the sample.
+1. Use the `dotnet run` command to run the sample.
+1. Select the **1. Create a connection** option. Enter a unique identifier, name, and description for the connection.
+1. Select the **4. Register schema for current connection** option. Wait for the operation to complete.
+
+    > **Note:** If this steps results in an error, wait a few minutes and then select the **5. View schema for current connection** option. If a schema is returned, the operation completed successfully. If no schema is returned, you may need to try registering the schema again.
+
+1. Select the **6. Push items to current connection** option.
+
+## Create a vertical
+
+In this step you'll create a vertical
+
+- Name: Appliance Parts
+- Content source: the connector created with the app
+- Leave Add a query blank
+- Select Add vertical
+- Select Enable vertical
+
+## Create a result type
+
+In this step you'll configure the result type
+
+- Name: Appliance Part
+- Content source: the connector created with the app
+- Skip rules
+- Paste contents of [result-type.json](result-type.json) into layout
+- Add result type
+
+## Search for results
+
+In this step you'll search for parts in SharePoint
+
+1. Go to your root SharePoint site for your tenant.
+1. Using the search box at the top of the page, search for `hinge`.
+1. When the search completes with 0 results, select the **Appliance Parts** tab.
+1. Results from the connector are displayed.

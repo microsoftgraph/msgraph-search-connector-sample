@@ -144,9 +144,30 @@ namespace PartsInventoryConnector.Graph
 
                     await Task.Delay(3000);
                 }
-
-                throw await ExceptionFromResponseAsync(response);
+                else
+                {
+                    throw await ExceptionFromResponseAsync(response);
+                }
             } while (true);
+        }
+
+        public async Task AddOrUpdateItem(string connectionId, ExternalItem item)
+        {
+            var payload = JsonConvert.SerializeObject(item, _serializerSettings);
+
+            // First attempt to add an item using PUT
+            var request = new HttpRequestMessage(HttpMethod.Put, $"external/connections/{connectionId}/items/{item.Id}");
+            request.Content = new StringContent(payload);
+            request.Content.Headers.ContentType.MediaType = "application/json";
+
+            var response = await _graphClient.SendAsync(request);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return;
+            }
+
+            throw await ExceptionFromResponseAsync(response);
         }
 
         public async Task<Schema> GetSchemaAsync(string connectionId)

@@ -1,13 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
+using CsvHelper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Graph;
 using PartsInventoryConnector.Authentication;
 using PartsInventoryConnector.Console;
+using PartsInventoryConnector.Data;
 using PartsInventoryConnector.Graph;
 using PartsInventoryConnector.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -18,6 +21,8 @@ namespace PartsInventoryConnector
         private static GraphHelper _graphHelper;
 
         private static Connection _currentConnection;
+
+        private static string _tenantId;
 
         static void Main(string[] args)
         {
@@ -33,6 +38,9 @@ namespace PartsInventoryConnector
                     Output.WriteLine(Output.Error, "Please see README.md for instructions on creating appsettings.json.");
                     return;
                 }
+
+                // Save tenant ID for setting ACL on items
+                _tenantId = appConfig["tenantId"];
 
                 // Initialize the auth provider
                 var authProvider = new ClientCredentialAuthProvider(
@@ -65,6 +73,7 @@ namespace PartsInventoryConnector
                             GetSchemaAsync().Wait();
                             break;
                         case MenuChoice.PushItems:
+                            UploadItemsFromCsvAsync("ApplianceParts.csv").Wait();
                             break;
                         case MenuChoice.Exit:
                             // Exit the program
@@ -214,9 +223,12 @@ namespace PartsInventoryConnector
                     BaseType = "microsoft.graph.externalItem",
                     Properties = new List<Property>
                     {
-                        new Property { Name = "title", Type = Property.StringProperty, IsQueryable = false, IsSearchable = true, IsRetrievable = true },
-                        new Property { Name = "priority", Type = Property.IntProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
-                        new Property { Name = "assignee", Type = Property.StringProperty, IsQueryable = true, IsSearchable = true, IsRetrievable = true }
+                        new Property { Name = "partNumber", Type = Property.IntProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "name", Type = Property.StringProperty, IsQueryable = true, IsSearchable = true, IsRetrievable = true },
+                        new Property { Name = "description", Type = Property.StringProperty, IsQueryable = false, IsSearchable = true, IsRetrievable = true },
+                        new Property { Name = "price", Type = Property.DoubleProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "inventory", Type = Property.IntProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "appliances", Type = Property.StringCollectionProperty, IsQueryable = true, IsSearchable = true, IsRetrievable = true }
                     }
                 };
 
@@ -249,6 +261,42 @@ namespace PartsInventoryConnector
                 Output.WriteLine(Output.Error, $"{serviceException.StatusCode} error getting schema:");
                 Output.WriteLine(Output.Error, serviceException.Message);
                 return;
+            }
+        }
+
+        private static async Task UploadItemsFromCsvAsync(string filePath)
+        {
+            var records = CsvDataLoader.LoadDataFromCsv(filePath);
+
+            foreach(var part in records)
+            {
+                var newItem = new ExternalItem
+                {
+                    Id = part.PartNumber.ToString(),
+                    Content = part.Description,
+                    Acl = new List<Acl>
+                    {
+                        new Acl {
+                            AccessType = "grant",
+                            Type = "everyone",
+                            Value = _tenantId
+                        }
+                    },
+                    Properties = part
+                };
+
+                try
+                {
+                    Output.Write(Output.Info, $"Uploading part number {part.PartNumber}...");
+                    await _graphHelper.AddOrUpdateItem(_currentConnection.Id, newItem);
+                    Output.WriteLine(Output.Success, "DONE");
+                }
+                catch (ServiceException serviceException)
+                {
+                    Output.WriteLine(Output.Error, "FAILED");
+                    Output.WriteLine(Output.Error, $"{serviceException.StatusCode} error adding or updating part {part.PartNumber}");
+                    Output.WriteLine(Output.Error, serviceException.Message);
+                }
             }
         }
 
