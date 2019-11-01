@@ -6,6 +6,7 @@ This .NET Core application shows how to use the Microsoft Graph indexing API to 
 
 In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
 
+1. Rename the [appsettings.json.example](PartsInventoryConnector/appsettings.json.example) to **appsettings.json**.
 1. Go to the [Azure Active Directory admin center](https://aad.portal.azure.com/) and sign in with an administrator account.
 1. Select **Azure Active Directory** in the left-hand pane, then select **App registrations** under **Manage**.
 1. Select **New registration**.
@@ -42,27 +43,24 @@ In this step you'll build and run the sample. This will create a new connection,
 
 ## Create a vertical
 
-In this step you'll create a vertical
+Create and enable a search vertical at the organization level following the instructions in [Customize the Microsoft Search page](https://docs.microsoft.com/MicrosoftSearch/customize-search-page).
 
-- Name: Appliance Parts
-- Content source: the connector created with the app
-- Leave Add a query blank
-- Select Add vertical
-- Select Enable vertical
+- **Name:** Appliance Parts
+- **Content source:** the connector created with the app
+- **Add a query:** leave blank
 
 ## Create a result type
 
-In this step you'll configure the result type
+Create a result type at the organization level following the instructions in [Customize the Microsoft Search page](https://docs.microsoft.com/MicrosoftSearch/customize-search-page).
 
-- Name: Appliance Part
-- Content source: the connector created with the app
-- Skip rules
+- **Name:** Appliance Part
+- **Content source:** the connector created with the app
+- **Rules:** None
 - Paste contents of [result-type.json](result-type.json) into layout
-- Add result type
 
 ## Search for results
 
-In this step you'll search for parts in SharePoint
+In this step you'll search for parts in SharePoint.
 
 1. Go to your root SharePoint site for your tenant.
 1. Using the search box at the top of the page, search for `hinge`.
