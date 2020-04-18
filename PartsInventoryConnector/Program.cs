@@ -273,7 +273,10 @@ namespace PartsInventoryConnector
                 var newItem = new ExternalItem
                 {
                     Id = part.PartNumber.ToString(),
-                    Content = part.Description,
+                    Content = new PayloadContent
+                    {                        
+                            Value = "<html>" + part.description + "</html>"
+                    },
                     Acl = new List<Acl>
                     {
                         new Acl {
