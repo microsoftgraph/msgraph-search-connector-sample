@@ -20,7 +20,7 @@ namespace PartsInventoryConnector
     {
         private static GraphHelper _graphHelper;
 
-        private static Connection _currentConnection;
+        private static ExternalConnection _currentConnection;
 
         private static string _tenantId;
 
@@ -126,7 +126,7 @@ namespace PartsInventoryConnector
                 // Get connections
                 var connections = await _graphHelper.GetExistingConnectionsAsync();
 
-                if (connections.Items.Count <= 0)
+                if (connections.CurrentPage.Count <= 0)
                 {
                     Output.WriteLine(Output.Warning, "No connections exist. Please create a new connection.");
                     return;
@@ -134,12 +134,12 @@ namespace PartsInventoryConnector
 
                 Output.WriteLine(Output.Info, "Choose one of the following connections:");
                 int menuNumber = 1;
-                foreach(var connection in connections.Items)
+                foreach(var connection in connections.CurrentPage)
                 {
                     Output.WriteLine($"{menuNumber++}. {connection.Name}");
                 }
 
-                Connection selectedConnection = null;
+                ExternalConnection selectedConnection = null;
 
                 do
                 {
@@ -148,9 +148,9 @@ namespace PartsInventoryConnector
                         Output.Write(Output.Info, "Selection: ");
                         var choice = int.Parse(System.Console.ReadLine());
 
-                        if (choice > 0 && choice <= connections.Items.Count)
+                        if (choice > 0 && choice <= connections.CurrentPage.Count)
                         {
-                            selectedConnection = connections.Items[choice-1];
+                            selectedConnection = connections.CurrentPage[choice-1];
                         }
                         else
                         {
@@ -223,12 +223,12 @@ namespace PartsInventoryConnector
                     BaseType = "microsoft.graph.externalItem",
                     Properties = new List<Property>
                     {
-                        new Property { Name = "partNumber", Type = Property.IntProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
-                        new Property { Name = "name", Type = Property.StringProperty, IsQueryable = true, IsSearchable = true, IsRetrievable = true },
-                        new Property { Name = "description", Type = Property.StringProperty, IsQueryable = false, IsSearchable = true, IsRetrievable = true },
-                        new Property { Name = "price", Type = Property.DoubleProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
-                        new Property { Name = "inventory", Type = Property.IntProperty, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
-                        new Property { Name = "appliances", Type = Property.StringCollectionProperty, IsQueryable = true, IsSearchable = true, IsRetrievable = true }
+                        new Property { Name = "partNumber", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true },
+                        new Property { Name = "description", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true },
+                        new Property { Name = "price", Type = PropertyType.Double, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "inventory", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true },
+                        new Property { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true }
                     }
                 };
 
@@ -273,16 +273,21 @@ namespace PartsInventoryConnector
                 var newItem = new ExternalItem
                 {
                     Id = part.PartNumber.ToString(),
-                    Content = part.Description,
+                    Content = new ExternalItemContent
+                    {
+                        Type = ExternalItemContentType.Text,
+                        Value = part.Description
+                    },
                     Acl = new List<Acl>
                     {
                         new Acl {
-                            AccessType = "grant",
-                            Type = "everyone",
-                            Value = _tenantId
+                            AccessType = AccessType.Grant,
+                            Type = AclType.Everyone,
+                            Value = _tenantId,
+                            IdentitySource = "Azure Active Directory"
                         }
                     },
-                    Properties = part
+                    Properties = part.AsExternalItemProperties()
                 };
 
                 try

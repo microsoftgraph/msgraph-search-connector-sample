@@ -2,92 +2,42 @@
 // Licensed under the MIT license.
 using Microsoft.Graph;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using PartsInventoryConnector.Models;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace PartsInventoryConnector.Graph
 {
     public class GraphHelper
     {
-        private HttpClient _graphClient;
-        private JsonSerializerSettings _serializerSettings;
+        private GraphServiceClient _graphClient;
 
         public GraphHelper(IAuthenticationProvider authProvider)
         {
             // Initialize the Graph client
-            // For now, use the HttpClient created by the Graph SDK
-            // Once the SDK is updated with the indexing API entities, this
-            // can be switched over to using the GraphServiceClient class.
-            _graphClient = GraphClientFactory.Create(authProvider, "beta");
-
-            _serializerSettings = new JsonSerializerSettings
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new CamelCaseNamingStrategy()
-                }
-            };
+            _graphClient = new GraphServiceClient(authProvider);
         }
 
         #region Connections
 
-        public async Task<Connection> CreateConnectionAsync(string id, string name, string description)
+        public async Task<ExternalConnection> CreateConnectionAsync(string id, string name, string description)
         {
-            var newConnection = new Connection
+            var newConnection = new ExternalConnection
             {
                 Id = id,
                 Name = name,
                 Description = description
             };
 
-            var payload = JsonConvert.SerializeObject(newConnection, _serializerSettings);
-
-            var request = new HttpRequestMessage(HttpMethod.Post, "external/connections");
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType.MediaType = "application/json";
-
-            var response = await _graphClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                var returnedConnection = JsonConvert.DeserializeObject<Connection>(responseJson, _serializerSettings);
-                return returnedConnection;
-            }
-
-            throw await ExceptionFromResponseAsync(response);
+            return await _graphClient.External.Connections.Request().AddAsync(newConnection);
         }
 
-        public async Task<GraphCollection<Connection>> GetExistingConnectionsAsync()
+        public async Task<IExternalConnectionsCollectionPage> GetExistingConnectionsAsync()
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, "external/connections");
-            var response = await _graphClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                var returnedCollection =
-                    JsonConvert.DeserializeObject<GraphCollection<Connection>>(responseJson, _serializerSettings);
-                return returnedCollection;
-            }
-
-            throw await ExceptionFromResponseAsync(response);
+            return await _graphClient.External.Connections.Request().GetAsync();
         }
 
         public async Task DeleteConnectionAsync(string connectionId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Delete, $"external/connections/{connectionId}");
-
-            var response = await _graphClient.SendAsync(request);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw await ExceptionFromResponseAsync(response);
-            }
+            await _graphClient.External.Connections[connectionId].Request().DeleteAsync();
         }
 
         #endregion
@@ -96,111 +46,56 @@ namespace PartsInventoryConnector.Graph
 
         public async Task RegisterSchemaAsync(string connectionId, Schema schema)
         {
-            var payload = JsonConvert.SerializeObject(schema, _serializerSettings);
+            var newSchema = await _graphClient.External.Connections[connectionId].Schema
+                .Request()
+                .Header("Prefer", "respond-async")
+                .CreateAsync(schema);
 
-            var request = new HttpRequestMessage(HttpMethod.Post, $"external/connections/{connectionId}/schema");
-            request.Headers.Add("Prefer", "respond-async");
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType.MediaType = "application/json";
+            // TODO: Figure out how to get operation ID
+            // Get Location header from response
+            await CheckSchemaStatusAsync(connectionId, newSchema.Id);
+    }
 
-            var response = await _graphClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Get Location header from response
-                await CheckSchemaStatusAsync(response.Headers.Location.AbsoluteUri);
-            }
-
-            throw await ExceptionFromResponseAsync(response);
-        }
-
-        public async Task CheckSchemaStatusAsync(string operationUri)
+        public async Task CheckSchemaStatusAsync(string connectionId, string operationId)
         {
             do
             {
-                var request = new HttpRequestMessage(HttpMethod.Get, operationUri);
-                var response = await _graphClient.SendAsync(request);
+                var operation = await _graphClient.External.Connections[connectionId]
+                    .Operations[operationId]
+                    .Request()
+                    .GetAsync();
 
-                if (response.IsSuccessStatusCode)
+                if (operation.Status == ConnectionOperationStatus.Completed)
                 {
-                    // Get Location header from response
-                    var responseBody = await response.Content.ReadAsStringAsync();
-                    var operation = JsonConvert.DeserializeObject<ConnectionOperation>(responseBody, _serializerSettings);
-
-                    if (operation.Status == ConnectionOperationStatus.Completed)
-                    {
-                        return;
-                    }
-                    else if (operation.Status == ConnectionOperationStatus.Failed)
-                    {
-                        throw new ServiceException(
-                            new Error
-                            {
-                                Code = operation.Error.ErrorCode,
-                                Message = operation.Error.Message
-                            }
-                        );
-                    }
-
-                    await Task.Delay(3000);
+                    return;
                 }
-                else
+                else if (operation.Status == ConnectionOperationStatus.Failed)
                 {
-                    throw await ExceptionFromResponseAsync(response);
+                    throw new ServiceException(
+                        new Error
+                        {
+                            Code = operation.Error.ErrorCode,
+                            Message = operation.Error.Message
+                        }
+                    );
                 }
+
+                await Task.Delay(3000);
             } while (true);
         }
 
         public async Task AddOrUpdateItem(string connectionId, ExternalItem item)
         {
-            var payload = JsonConvert.SerializeObject(item, _serializerSettings);
-
-            // First attempt to add an item using PUT
-            var request = new HttpRequestMessage(HttpMethod.Put, $"external/connections/{connectionId}/items/{item.Id}");
-            request.Content = new StringContent(payload);
-            request.Content.Headers.ContentType.MediaType = "application/json";
-
-            var response = await _graphClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return;
-            }
-
-            throw await ExceptionFromResponseAsync(response);
+            // TODO: Make sure this does a PUT
+            await _graphClient.External.Connections[connectionId]
+                .Items[item.Id].Request().CreateAsync(item);
         }
 
         public async Task<Schema> GetSchemaAsync(string connectionId)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, $"external/connections/{connectionId}/schema");
-            var response = await _graphClient.SendAsync(request);
-
-            if (response.IsSuccessStatusCode)
-            {
-                var responseJson = await response.Content.ReadAsStringAsync();
-                var returnedSchema = JsonConvert.DeserializeObject<Schema>(responseJson, _serializerSettings);
-                return returnedSchema;
-            }
-
-            throw await ExceptionFromResponseAsync(response);
+            return await _graphClient.External.Connections[connectionId].Schema.Request().GetAsync();
         }
 
         #endregion
-
-        private async Task<ServiceException> ExceptionFromResponseAsync(HttpResponseMessage response)
-        {
-            var error = new Error{
-                Code = "generalException",
-                Message = "Unexpected exception returned from the service."
-            };
-
-            if (response.Content != null)
-            {
-                var responseBody = await response.Content.ReadAsStringAsync();
-                error.Message = responseBody;
-            }
-
-            return new ServiceException(error, response.Headers, response.StatusCode);
-        }
     }
 }
