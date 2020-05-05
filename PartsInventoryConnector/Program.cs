@@ -220,6 +220,9 @@ namespace PartsInventoryConnector
                 // Register the schema
                 var schema = new Schema
                 {
+                    // Need to set to null, service returns 400
+                    // if @odata.type property is sent
+                    ODataType = null,
                     BaseType = "microsoft.graph.externalItem",
                     Properties = new List<Property>
                     {
@@ -266,6 +269,12 @@ namespace PartsInventoryConnector
 
         private static async Task UploadItemsFromCsvAsync(string filePath)
         {
+            if (_currentConnection == null)
+            {
+                Output.WriteLine(Output.Warning, "No connection selected. Please create a new connection or select an existing connection.");
+                return;
+            }
+
             var records = CsvDataLoader.LoadDataFromCsv(filePath);
 
             foreach(var part in records)
@@ -275,6 +284,9 @@ namespace PartsInventoryConnector
                     Id = part.PartNumber.ToString(),
                     Content = new ExternalItemContent
                     {
+                        // Need to set to null, service returns 400
+                        // if @odata.type property is sent
+                        ODataType = null,
                         Type = ExternalItemContentType.Text,
                         Value = part.Description
                     },
