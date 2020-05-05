@@ -12,7 +12,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.0.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
     <PackageReference Include="Microsoft.Graph.Beta" Version="0.17.0-preview" />
-    <PackageReference Include="Microsoft.Identity.Client" Version="4.4.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.13.0" />
   </ItemGroup>
 
 </Project>
