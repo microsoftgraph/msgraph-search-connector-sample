@@ -34,8 +34,8 @@ namespace PartsInventoryConnector
                 var appConfig = LoadAppSettings();
                 if (appConfig == null)
                 {
-                    Output.WriteLine(Output.Error, "Missing or invalid appsettings.json!");
-                    Output.WriteLine(Output.Error, "Please see README.md for instructions on creating appsettings.json.");
+                    Output.WriteLine(Output.Error, "Missing or invalid user secrets");
+                    Output.WriteLine(Output.Error, "Please see README.md for instructions on configuring the application.");
                     return;
                 }
 
@@ -361,8 +361,7 @@ namespace PartsInventoryConnector
         private static IConfigurationRoot LoadAppSettings()
         {
             var appConfig = new ConfigurationBuilder()
-                .SetBasePath(System.IO.Directory.GetCurrentDirectory())
-                .AddJsonFile("appsettings.json", false, true)
+                .AddUserSecrets<Program>()
                 .Build();
 
             // Check for required settings

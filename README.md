@@ -6,7 +6,6 @@ This .NET Core application shows how to use the Microsoft Graph indexing API to 
 
 In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
 
-1. Rename the [appsettings.json.example](PartsInventoryConnector/appsettings.json.example) to **appsettings.json**.
 1. Go to the [Azure Active Directory admin center](https://aad.portal.azure.com/) and sign in with an administrator account.
 1. Select **Azure Active Directory** in the left-hand pane, then select **App registrations** under **Manage**.
 1. Select **New registration**.
@@ -16,16 +15,32 @@ In this step you'll register an application in the Azure AD admin center. This i
     - **Supported account types:** `Accounts in this organizational directory only (Microsoft only - Single tenant)`
     - **Redirect URI:** Leave blank
 
-1. On the **Parts Inventory Connector** page, copy the value of **Application (client) ID**. Replace the `YOUR_APP_ID_HERE` value in **appsettings.json** with the copied ID.
-1. Copy the value of **Directory (tenant) ID**. Replace the `YOUR_TENANT_ID_HERE` value in **appsettings.json** with the copied ID.
+1. On the **Parts Inventory Connector** page, copy the value of **Application (client) ID**, you'll need it in the next section.
+1. Copy the value of **Directory (tenant) ID**, you'll need it in the next section.
 1. Select **API Permissions** under **Manage**.
 1. Select **Add a permission**, then select **Microsoft Graph**.
 1. Select **Application permissions**, then select the **ExternalItem.ReadWrite.All** permission. Select **Add permissions**.
 1. Select **Grant admin consent for {TENANT}**, then select **Yes** when prompted.
 1. Select **Certificates & secrets** under **Manage**, then select **New client secret**.
 1. Enter a description and choose an expiration time for the secret, then select **Add**.
-1. Copy the new secret. Replace the `YOUR_APP_SECRET_HERE` value in **appsettings.json** with the copied secret.
-1. Select **Overview**
+1. Copy the new secret, you'll need it in the next section.
+
+## Configure the app
+
+1. Open your command line interface (CLI) in the directory where **PartsInventoryConnector.csproj** is located.
+1. Run the following command to initialize [user secrets](https://docs.microsoft.com/aspnet/core/security/app-secrets) for the project.
+
+    ```Shell
+    dotnet user-secrets init
+    ```
+
+1. Run the following commands to store your app ID, app secret, and tenant ID in the user secret store.
+
+    ```powershell
+    dotnet user-secrets set appId "YOUR_APP_ID_HERE"
+    dotnet user-secrets set appSecret "YOUR_APP_SECRET_HERE"
+    dotnet user-secrets set tenantId "YOUR_TENANT_ID_HERE"
+    ```
 
 ## Run the app
 
