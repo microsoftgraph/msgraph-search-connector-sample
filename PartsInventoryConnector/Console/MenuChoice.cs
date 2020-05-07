@@ -11,7 +11,8 @@ namespace PartsInventoryConnector.Console
         DeleteConnection,
         RegisterSchema,
         ViewSchema,
-        PushItems,
+        PushUpdatedItems,
+        PushAllItems,
         Exit
     }
 }

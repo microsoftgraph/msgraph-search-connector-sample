@@ -1,3 +1,9 @@
 bin/
 obj/
-appsettings.json
+
+.vscode/settings.json
+
+parts.db
+parts.db-shm
+parts.db-wal
+lastuploadtime.bin

@@ -3,11 +3,13 @@
 using Microsoft.Graph;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace PartsInventoryConnector.Models
 {
     public class AppliancePart
     {
+        [Key]
         public int PartNumber { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }

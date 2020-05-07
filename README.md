@@ -2,6 +2,11 @@
 
 This .NET Core application shows how to use the Microsoft Graph indexing API to create a connection to the Microsoft Search service and index custom items. The sample indexes appliance parts inventory for Contoso Appliance Repair.
 
+## Prerequisites
+
+- .NET 3.1 SDK
+- [Entity Framework Core Tools](https://docs.microsoft.com/ef/core/miscellaneous/cli/dotnet) (`dotnet tool install --global dotnet-ef`)
+
 ## Register an app in Azure portal
 
 In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
@@ -30,17 +35,30 @@ In this step you'll register an application in the Azure AD admin center. This i
 1. Open your command line interface (CLI) in the directory where **PartsInventoryConnector.csproj** is located.
 1. Run the following command to initialize [user secrets](https://docs.microsoft.com/aspnet/core/security/app-secrets) for the project.
 
-    ```Shell
+    ```dotnetcli
     dotnet user-secrets init
     ```
 
 1. Run the following commands to store your app ID, app secret, and tenant ID in the user secret store.
 
-    ```powershell
+    ```dotnetcli
     dotnet user-secrets set appId "YOUR_APP_ID_HERE"
     dotnet user-secrets set appSecret "YOUR_APP_SECRET_HERE"
     dotnet user-secrets set tenantId "YOUR_TENANT_ID_HERE"
     ```
+
+## Initialize the database
+
+```dotnetcli
+dotnet ef database update
+```
+
+### Delete and reset database
+
+```dotnetcli
+dotnet ef database drop
+dotnet ef database update
+```
 
 ## Run the app
 
