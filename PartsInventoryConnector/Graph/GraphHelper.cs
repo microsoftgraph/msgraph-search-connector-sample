@@ -144,6 +144,12 @@ namespace PartsInventoryConnector.Graph
             }
         }
 
+        public async Task DeleteItem(string connectionId, string itemId)
+        {
+            await _graphClient.External.Connections[connectionId]
+                .Items[itemId].Request().DeleteAsync();
+        }
+
         public async Task<Schema> GetSchemaAsync(string connectionId)
         {
             return await _graphClient.External.Connections[connectionId].Schema.Request().GetAsync();

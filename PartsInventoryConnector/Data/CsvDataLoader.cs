@@ -4,12 +4,13 @@ using CsvHelper.TypeConversion;
 using PartsInventoryConnector.Models;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace PartsInventoryConnector.Data
 {
     public static class CsvDataLoader
     {
-        public static List<AppliancePart> LoadDataFromCsv(string filePath)
+        public static List<AppliancePart> LoadPartsFromCsv(string filePath)
         {
             using (var reader = new StreamReader(filePath))
             using (var csv = new CsvReader(reader))

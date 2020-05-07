@@ -2,6 +2,12 @@
 
 This .NET Core application shows how to use the Microsoft Graph indexing API to create a connection to the Microsoft Search service and index custom items. The sample indexes appliance parts inventory for Contoso Appliance Repair.
 
+## Prerequisites
+
+- .NET 3.1 SDK
+- [Entity Framework Core Tools](https://docs.microsoft.com/ef/core/miscellaneous/cli/dotnet) (`dotnet tool install --global dotnet-ef`)
+- Some way to update a SQLite database. For example, the [DB Browser for SQLite](https://sqlitebrowser.org/).
+
 ## Register an app in Azure portal
 
 In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
@@ -30,17 +36,30 @@ In this step you'll register an application in the Azure AD admin center. This i
 1. Open your command line interface (CLI) in the directory where **PartsInventoryConnector.csproj** is located.
 1. Run the following command to initialize [user secrets](https://docs.microsoft.com/aspnet/core/security/app-secrets) for the project.
 
-    ```Shell
+    ```dotnetcli
     dotnet user-secrets init
     ```
 
 1. Run the following commands to store your app ID, app secret, and tenant ID in the user secret store.
 
-    ```powershell
+    ```dotnetcli
     dotnet user-secrets set appId "YOUR_APP_ID_HERE"
     dotnet user-secrets set appSecret "YOUR_APP_SECRET_HERE"
     dotnet user-secrets set tenantId "YOUR_TENANT_ID_HERE"
     ```
+
+## Initialize the database
+
+```dotnetcli
+dotnet ef database update
+```
+
+### Delete and reset database
+
+```dotnetcli
+dotnet ef database drop
+dotnet ef database update
+```
 
 ## Run the app
 
@@ -54,7 +73,7 @@ In this step you'll build and run the sample. This will create a new connection,
 
     > **Note:** If this steps results in an error, wait a few minutes and then select the **5. View schema for current connection** option. If a schema is returned, the operation completed successfully. If no schema is returned, you may need to try registering the schema again.
 
-1. Select the **6. Push items to current connection** option.
+1. Select the **6. Push updated items to current connection** option.
 
 ## Create a vertical
 
@@ -81,3 +100,11 @@ In this step you'll search for parts in SharePoint.
 1. Using the search box at the top of the page, search for `hinge`.
 1. When the search completes with 0 results, select the **Appliance Parts** tab.
 1. Results from the connector are displayed.
+
+## Updating records in the database
+
+Use your favorite tool to update records in the database. The **Push updated items** menu choice will only push the items you update.
+
+> **NOTE:** Do not delete records from the database. To "delete" an item, set the IsDeleted property to 1.
+>
+> ![DB Browser](images/dbbrowser.png)
