@@ -315,7 +315,7 @@ namespace PartsInventoryConnector
                         .ToList();
 
                     partsToDelete = db.Parts
-                        .IgnoreQueryFilters()
+                        .IgnoreQueryFilters() // Normally items with IsDeleted = 1 aren't included in queries
                         .Where(p => (EF.Property<bool>(p, "IsDeleted") && EF.Property<DateTime>(p, "LastUpdated") > lastUploadTime))
                         .ToList();
                 }
@@ -325,7 +325,7 @@ namespace PartsInventoryConnector
                         .ToList();
 
                     partsToDelete = db.Parts
-                        .IgnoreQueryFilters()
+                        .IgnoreQueryFilters() // Normally items with IsDeleted = 1 aren't included in queries
                         .Where(p => EF.Property<bool>(p, "IsDeleted"))
                         .ToList();
                 }
@@ -406,6 +406,7 @@ namespace PartsInventoryConnector
         }
 
         private static readonly string uploadTimeFile = "lastuploadtime.bin";
+
         private static DateTime GetLastUploadTime()
         {
             if (System.IO.File.Exists(uploadTimeFile))

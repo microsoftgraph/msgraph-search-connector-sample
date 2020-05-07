@@ -19,12 +19,16 @@ namespace PartsInventoryConnector.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            // EF Core can't store lists, so add a converter for the Appliances
+            // property to serialize as a JSON string on save to DB
             modelBuilder.Entity<AppliancePart>()
                 .Property(ap => ap.Appliances)
                 .HasConversion(
                     v => JsonConvert.SerializeObject(v),
                     v => JsonConvert.DeserializeObject<List<string>>(v)
                 );
+
+            // Add LastUpdated and IsDeleted shadow properties
             modelBuilder.Entity<AppliancePart>()
                 .Property<DateTime>("LastUpdated")
                 .HasDefaultValueSql("datetime()")
@@ -34,6 +38,8 @@ namespace PartsInventoryConnector.Models
                 .IsRequired()
                 .HasDefaultValue(false);
 
+            // Exclude any soft-deleted items (IsDeleted = 1) from
+            // the default query sets
             modelBuilder.Entity<AppliancePart>()
                 .HasQueryFilter(a => !EF.Property<bool>(a, "IsDeleted"));
         }
