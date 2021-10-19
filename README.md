@@ -1,6 +1,6 @@
 # Microsoft Graph connector Sample
 
-This .NET Core sample application demonstrates how to build a custom [Microsoft Graph connector] (https://docs.microsoft.com/en-us/graph/connecting-external-content-connectors-overview) using Microsoft Graph APIs to index items from a sample applicance parts inventory, and have that data appear in [Microsoft Search] (https://docs.microsoft.com/en-us/microsoftsearch/) results.
+This .NET Core sample application demonstrates how to build a custom [Microsoft Graph connector](https://docs.microsoft.com/en-us/graph/connecting-external-content-connectors-overview) using Microsoft Graph APIs to index items from a sample applicance parts inventory, and have that data appear in [Microsoft Search](https://docs.microsoft.com/en-us/microsoftsearch/) results.
 
 ## Prerequisites
 
