@@ -1,10 +1,12 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT license.
 using CsvHelper;
 using CsvHelper.Configuration;
 using CsvHelper.TypeConversion;
 using PartsInventoryConnector.Models;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using System.Linq;
 
 namespace PartsInventoryConnector.Data
 {
@@ -13,9 +15,8 @@ namespace PartsInventoryConnector.Data
         public static List<AppliancePart> LoadPartsFromCsv(string filePath)
         {
             using (var reader = new StreamReader(filePath))
-            using (var csv = new CsvReader(reader))
+            using (CsvReader csv = new CsvReader(reader, CultureInfo.InvariantCulture))
             {
-                csv.Configuration.RegisterClassMap<AppliancePartMap>();
                 return new List<AppliancePart>(csv.GetRecords<AppliancePart>());
             }
         }
