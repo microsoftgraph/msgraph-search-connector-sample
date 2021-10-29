@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 using Microsoft.Graph;
-using Newtonsoft.Json;
+using Microsoft.Graph.ExternalConnectors;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -110,7 +110,7 @@ namespace PartsInventoryConnector.Graph
                     throw new ServiceException(
                         new Error
                         {
-                            Code = operation.Error.ErrorCode,
+                            Code = operation.Error.Code,
                             Message = operation.Error.Message
                         }
                     );

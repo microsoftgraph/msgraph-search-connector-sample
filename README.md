@@ -1,6 +1,6 @@
-# Microsoft Graph Search Connector Sample
+# Microsoft Graph connector Sample
 
-This .NET Core application shows how to use the Microsoft Graph indexing API to create a connection to the Microsoft Search service and index custom items. The sample indexes appliance parts inventory for Contoso Appliance Repair.
+This .NET Core sample application demonstrates how to build a custom [Microsoft Graph connector](https://docs.microsoft.com/en-us/graph/connecting-external-content-connectors-overview) using Microsoft Graph APIs to index items from a sample applicance parts inventory, and have that data appear in [Microsoft Search](https://docs.microsoft.com/en-us/microsoftsearch/) results.
 
 ## Prerequisites
 
@@ -25,7 +25,8 @@ In this step you'll register an application in the Azure AD admin center. This i
 1. Copy the value of **Directory (tenant) ID**, you'll need it in the next section.
 1. Select **API Permissions** under **Manage**.
 1. Select **Add a permission**, then select **Microsoft Graph**.
-1. Select **Application permissions**, then select the **ExternalItem.ReadWrite.All** permission. Select **Add permissions**.
+1. Select **Application permissions**, then select the **ExternalItem.ReadWrite.OwnedBy** permission. Select **Add permissions**.
+1. Select **Application permissions**, then select the **ExternalConnection.ReadWrite.OwnedBy** permission. Select **Add permissions**.
 1. Select **Grant admin consent for {TENANT}**, then select **Yes** when prompted.
 1. Select **Certificates & secrets** under **Manage**, then select **New client secret**.
 1. Enter a description and choose an expiration time for the secret, then select **Add**.
@@ -77,7 +78,7 @@ In this step you'll build and run the sample. This will create a new connection,
 
 ## Create a vertical
 
-Create and enable a search vertical at the organization level following the instructions in [Customize the Microsoft Search page](https://docs.microsoft.com/MicrosoftSearch/customize-search-page).
+Create and enable a search vertical at the organization level following the instructions in [Manage Verticals] (https://docs.microsoft.com/en-us/microsoftsearch/manage-verticals).
 
 - **Name:** Appliance Parts
 - **Content source:** the connector created with the app
@@ -85,7 +86,7 @@ Create and enable a search vertical at the organization level following the inst
 
 ## Create a result type
 
-Create a result type at the organization level following the instructions in [Customize the Microsoft Search page](https://docs.microsoft.com/MicrosoftSearch/customize-search-page).
+Create a result type at the organization level following the instructions in [Manage Result Types] (https://docs.microsoft.com/en-us/microsoftsearch/manage-result-types).
 
 - **Name:** Appliance Part
 - **Content source:** the connector created with the app

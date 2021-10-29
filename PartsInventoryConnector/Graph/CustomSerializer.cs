@@ -1,4 +1,5 @@
 using Microsoft.Graph;
+using Microsoft.Graph.ExternalConnectors;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
