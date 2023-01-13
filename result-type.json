@@ -37,7 +37,7 @@
               "facts": [
                 {
                   "title": "Price",
-                  "value": "${price}"
+                  "value": "{price}"
                 },
                 {
                   "title": "Current Inventory",
