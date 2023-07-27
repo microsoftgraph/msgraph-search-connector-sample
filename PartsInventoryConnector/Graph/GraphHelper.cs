@@ -1,160 +1,195 @@
-// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
+
+// <UsingsSnippet>
+using System.Net.Http.Headers;
+using Azure.Core;
+using Azure.Identity;
 using Microsoft.Graph;
-using Microsoft.Graph.ExternalConnectors;
-using System.Net.Http;
-using System.Threading.Tasks;
+using Microsoft.Graph.Models.ExternalConnectors;
+// </UsingsSnippet>
+using SdkClientLogging;
+using Microsoft.Extensions.Logging;
 
-namespace PartsInventoryConnector.Graph
+namespace PartsInventoryConnector.Graph;
+
+public static class GraphHelper
 {
-    public class GraphHelper
+    // <GraphInitializationSnippet>
+    private static ClientSecretCredential? credential;
+    private static GraphServiceClient? graphClient;
+    private static HttpClient? httpClient;
+    public static void Initialize(Settings settings)
     {
-        private GraphServiceClient _graphClient;
+        // Create a credential that uses the client credentials
+        // authorization flow
+        credential = new ClientSecretCredential(
+            settings.TenantId, settings.ClientId, settings.ClientSecret);
 
-        public GraphHelper(IAuthenticationProvider authProvider)
-        {
-            // Configure a default HttpProvider with our
-            // custom serializer to handle the PropertyType serialization
-            var serializer = new CustomSerializer();
-            var httpProvider = new HttpProvider(serializer);
+        // Create a Graph client using the credential
+        // graphClient = new GraphServiceClient(
+        //     credential, new[] { "https://graph.microsoft.com/.default" });
 
-            // Initialize the Graph client
-            _graphClient = new GraphServiceClient(authProvider, httpProvider);
-        }
-
-        #region Connections
-
-        public async Task<ExternalConnection> CreateConnectionAsync(string id, string name, string description)
-        {
-            var newConnection = new ExternalConnection
-            {
-                // Need to set to null, service returns 400
-                // if @odata.type property is sent
-                ODataType = null,
-                Id = id,
-                Name = name,
-                Description = description
-            };
-
-            return await _graphClient.External.Connections.Request().AddAsync(newConnection);
-        }
-
-        public async Task<IExternalConnectionsCollectionPage> GetExistingConnectionsAsync()
-        {
-            return await _graphClient.External.Connections.Request().GetAsync();
-        }
-
-        public async Task DeleteConnectionAsync(string connectionId)
-        {
-            await _graphClient.External.Connections[connectionId].Request().DeleteAsync();
-        }
-
-        #endregion
-
-        #region Schema
-
-        public async Task RegisterSchemaAsync(string connectionId, Schema schema)
-        {
-            // Need access to the HTTP response here since we are doing an
-            // async request. The new schema object isn't returned, we need
-            // the Location header from the response
-            var asyncNewSchemaRequest = _graphClient.External.Connections[connectionId].Schema
-                .Request()
-                .Header("Prefer", "respond-async")
-                .GetHttpRequestMessage();
-
-            asyncNewSchemaRequest.Method = HttpMethod.Post;
-            asyncNewSchemaRequest.Content = _graphClient.HttpProvider.Serializer.SerializeAsJsonContent(schema);
-
-            var response = await _graphClient.HttpProvider.SendAsync(asyncNewSchemaRequest);
-
-            if (response.IsSuccessStatusCode)
-            {
-                // Get the operation ID from the Location header
-                var operationId = ExtractOperationId(response.Headers.Location);
-                await CheckSchemaStatusAsync(connectionId, operationId);
-            }
-            else
-            {
-                throw new ServiceException(
-                    new Error
-                    {
-                        Code = response.StatusCode.ToString(),
-                        Message = "Registering schema failed"
-                    }
-                );
-            }
-        }
-
-        private string ExtractOperationId(System.Uri uri)
-        {
-            int numSegments = uri.Segments.Length;
-            return uri.Segments[numSegments - 1];
-        }
-
-        public async Task CheckSchemaStatusAsync(string connectionId, string operationId)
-        {
-            do
-            {
-                var operation = await _graphClient.External.Connections[connectionId]
-                    .Operations[operationId]
-                    .Request()
-                    .GetAsync();
-
-                if (operation.Status == ConnectionOperationStatus.Completed)
-                {
-                    return;
-                }
-                else if (operation.Status == ConnectionOperationStatus.Failed)
-                {
-                    throw new ServiceException(
-                        new Error
-                        {
-                            Code = operation.Error.Code,
-                            Message = operation.Error.Message
-                        }
-                    );
-                }
-
-                await Task.Delay(3000);
-            } while (true);
-        }
-
-        public async Task AddOrUpdateItem(string connectionId, ExternalItem item)
-        {
-            // The SDK's auto-generated request builder uses POST here,
-            // which isn't correct. For now, get the HTTP request and change it
-            // to PUT manually.
-            var putItemRequest = _graphClient.External.Connections[connectionId]
-                .Items[item.Id].Request().GetHttpRequestMessage();
-
-            putItemRequest.Method = HttpMethod.Put;
-            putItemRequest.Content = _graphClient.HttpProvider.Serializer.SerializeAsJsonContent(item);
-
-            var response = await _graphClient.HttpProvider.SendAsync(putItemRequest);
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new ServiceException(
-                    new Error
-                    {
-                        Code = response.StatusCode.ToString(),
-                        Message = "Error indexing item."
-                    }
-                );
-            }
-        }
-
-        public async Task DeleteItem(string connectionId, string itemId)
-        {
-            await _graphClient.External.Connections[connectionId]
-                .Items[itemId].Request().DeleteAsync();
-        }
-
-        public async Task<Schema> GetSchemaAsync(string connectionId)
-        {
-            return await _graphClient.External.Connections[connectionId].Schema.Request().GetAsync();
-        }
-
-        #endregion
+        graphClient = GetDebugClient(credential);
     }
+    // </GraphInitializationSnippet>
+
+    private static GraphServiceClient GetDebugClient(ClientSecretCredential credential)
+    {
+        using var loggerFactory = LoggerFactory.Create(builder =>
+        {
+            builder
+                .ClearProviders()
+                .AddSimpleConsole(options => options.SingleLine = true);
+        });
+        var logger = loggerFactory.CreateLogger<SdkClientDebugLogMiddleware>();
+        var handlers = GraphClientFactory.CreateDefaultHandlers();
+        handlers.Add(new SdkClientDebugLogMiddleware(logger, true, true));
+        httpClient = GraphClientFactory.Create(handlers);
+        return new GraphServiceClient(httpClient,
+            new Microsoft.Kiota.Authentication.Azure.AzureIdentityAuthenticationProvider(credential, scopes: new[] { "https://graph.microsoft.com/.default" }));
+    }
+
+    // <CreateConnectionSnippet>
+    public static async Task<ExternalConnection?> CreateConnectionAsync(string id, string name, string? description)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+
+        var newConnection = new ExternalConnection
+        {
+            Id = id,
+            Name = name,
+            Description = description,
+        };
+
+        return await graphClient.External.Connections.PostAsync(newConnection);
+    }
+    // <CreateConnectionSnippet>
+
+    // <GetConnectionsSnippet>
+    public static async Task<ExternalConnectionCollectionResponse?> GetExistingConnectionsAsync()
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+
+        return await graphClient.External.Connections.GetAsync();
+    }
+    // </GetConnectionsSnippet>
+
+    // <DeleteConnectionSnippet>
+    public static async Task DeleteConnectionAsync(string? connectionId)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+        _ = connectionId ?? throw new ArgumentException("connectionId is required");
+
+        await graphClient.External.Connections[connectionId].DeleteAsync();
+    }
+    // </DeleteConnectionSnippet>
+
+    // <RegisterSchemaSnippet>
+    public static async Task RegisterSchemaAsync(string? connectionId, Schema schema)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+        _ = credential ?? throw new MemberAccessException("credential is null");
+        _ = httpClient ?? throw new MemberAccessException("httpClient is null");
+        _ = connectionId ?? throw new ArgumentException("connectionId is required");
+        // Use the Graph SDK's request builder to generate the request URL
+        var requestInfo = graphClient.External
+            .Connections[connectionId]
+            .Schema
+            .ToGetRequestInformation();
+
+        requestInfo.SetContentFromParsable(graphClient.RequestAdapter, "application/json", schema);
+
+        // Convert the SDK request to an HttpRequestMessage
+        var requestMessage = await graphClient.RequestAdapter
+            .ConvertToNativeRequestAsync<HttpRequestMessage>(requestInfo);
+        _ = requestMessage ?? throw new Exception("Could not create native HTTP request");
+        requestMessage.Method = HttpMethod.Post;
+        requestMessage.Headers.Add("Prefer", "respond-async");
+
+        // Send the request
+        var responseMessage = await httpClient.SendAsync(requestMessage) ??
+            throw new Exception("No response returned from API");
+
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            // The operation ID is contained in the Location header returned
+            // in the response
+            var operationId = responseMessage.Headers.Location?.Segments.Last() ??
+                throw new Exception("Could not get operation ID from Location header");
+            await WaitForOperationToCompleteAsync(connectionId, operationId);
+        }
+        else
+        {
+            throw new ServiceException("Registering schema failed",
+                responseMessage.Headers, (int)responseMessage.StatusCode);
+        }
+    }
+
+    private static async Task WaitForOperationToCompleteAsync(string connectionId, string operationId)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+
+        do
+        {
+            var operation = await graphClient.External
+                .Connections[connectionId]
+                .Operations[operationId]
+                .GetAsync();
+
+            if (operation?.Status == ConnectionOperationStatus.Completed)
+            {
+                return;
+            }
+            else if (operation?.Status == ConnectionOperationStatus.Failed)
+            {
+                throw new ServiceException($"Schema operation failed: {operation?.Error?.Code} {operation?.Error?.Message}");
+            }
+
+            // Wait 5 seconds and check again
+            await Task.Delay(5000);
+        } while (true);
+    }
+    // </RegisterSchemaSnippet>
+
+    // <GetSchemaSnippet>
+    public static async Task<Schema?> GetSchemaAsync(string? connectionId)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+        _ = connectionId ?? throw new ArgumentException("connectionId is null");
+
+        return await graphClient.External
+            .Connections[connectionId]
+            .Schema
+            .GetAsync();
+    }
+    // </GetSchemaSnippet>
+
+    // <AddOrUpdateItemSnippet>
+    public static async Task AddOrUpdateItemAsync(string? connectionId, ExternalItem item)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+        _ = connectionId ?? throw new ArgumentException("connectionId is null");
+
+        await graphClient.External
+            .Connections[connectionId]
+            .Items[item.Id]
+            .PutAsync(item);
+    }
+    // </AddOrUpdateItemSnippet>
+
+    // <DeleteItemSnippet>
+    public static async Task DeleteItemAsync(string? connectionId, string? itemId)
+    {
+        _ = graphClient ?? throw new MemberAccessException("graphClient is null");
+        _ = connectionId ?? throw new ArgumentException("connectionId is null");
+        _ = itemId ?? throw new ArgumentException("itemId is null");
+
+        await graphClient.External
+            .Connections[connectionId]
+            .Items[itemId]
+            .DeleteAsync();
+    }
+    // </DeleteItemSnippet>
 }
+

@@ -1,9 +1,10 @@
 bin/
 obj/
 
-.vscode/settings.json
-
 parts.db
 parts.db-shm
 parts.db-wal
 lastuploadtime.bin
+
+OLD/
+Migrations/
