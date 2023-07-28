@@ -2,53 +2,37 @@
 // Licensed under the MIT license.
 
 // <UsingsSnippet>
-using System.Net.Http.Headers;
-using Azure.Core;
 using Azure.Identity;
 using Microsoft.Graph;
 using Microsoft.Graph.Models.ExternalConnectors;
+using Microsoft.Kiota.Authentication.Azure;
 // </UsingsSnippet>
-using SdkClientLogging;
-using Microsoft.Extensions.Logging;
 
 namespace PartsInventoryConnector.Graph;
 
 public static class GraphHelper
 {
     // <GraphInitializationSnippet>
-    private static ClientSecretCredential? credential;
     private static GraphServiceClient? graphClient;
     private static HttpClient? httpClient;
     public static void Initialize(Settings settings)
     {
         // Create a credential that uses the client credentials
         // authorization flow
-        credential = new ClientSecretCredential(
+        var credential = new ClientSecretCredential(
             settings.TenantId, settings.ClientId, settings.ClientSecret);
 
-        // Create a Graph client using the credential
-        // graphClient = new GraphServiceClient(
-        //     credential, new[] { "https://graph.microsoft.com/.default" });
+        // Create an HTTP client
+        httpClient = GraphClientFactory.Create();
 
-        graphClient = GetDebugClient(credential);
+        // Create an auth provider
+        var authProvider = new AzureIdentityAuthenticationProvider(
+            credential, scopes: new[] { "https://graph.microsoft.com/.default" });
+
+        // Create a Graph client using the credential
+        graphClient = new GraphServiceClient(httpClient, authProvider);
     }
     // </GraphInitializationSnippet>
-
-    private static GraphServiceClient GetDebugClient(ClientSecretCredential credential)
-    {
-        using var loggerFactory = LoggerFactory.Create(builder =>
-        {
-            builder
-                .ClearProviders()
-                .AddSimpleConsole(options => options.SingleLine = true);
-        });
-        var logger = loggerFactory.CreateLogger<SdkClientDebugLogMiddleware>();
-        var handlers = GraphClientFactory.CreateDefaultHandlers();
-        handlers.Add(new SdkClientDebugLogMiddleware(logger, true, true));
-        httpClient = GraphClientFactory.Create(handlers);
-        return new GraphServiceClient(httpClient,
-            new Microsoft.Kiota.Authentication.Azure.AzureIdentityAuthenticationProvider(credential, scopes: new[] { "https://graph.microsoft.com/.default" }));
-    }
 
     // <CreateConnectionSnippet>
     public static async Task<ExternalConnection?> CreateConnectionAsync(string id, string name, string? description)
@@ -89,7 +73,6 @@ public static class GraphHelper
     public static async Task RegisterSchemaAsync(string? connectionId, Schema schema)
     {
         _ = graphClient ?? throw new MemberAccessException("graphClient is null");
-        _ = credential ?? throw new MemberAccessException("credential is null");
         _ = httpClient ?? throw new MemberAccessException("httpClient is null");
         _ = connectionId ?? throw new ArgumentException("connectionId is required");
         // Use the Graph SDK's request builder to generate the request URL
