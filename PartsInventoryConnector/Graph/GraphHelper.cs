@@ -64,7 +64,7 @@ public static class GraphHelper
 
         return await graphClient.External.Connections.PostAsync(newConnection);
     }
-    // <CreateConnectionSnippet>
+    // </CreateConnectionSnippet>
 
     // <GetConnectionsSnippet>
     public static async Task<ExternalConnectionCollectionResponse?> GetExistingConnectionsAsync()
