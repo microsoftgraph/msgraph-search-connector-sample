@@ -3,7 +3,9 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using PartsInventoryConnector.Models;
+using PartsInventoryConnector.Data;
+
+#nullable disable
 
 namespace PartsInventoryConnector.Migrations
 {
@@ -13,10 +15,9 @@ namespace PartsInventoryConnector.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.3");
+            modelBuilder.HasAnnotation("ProductVersion", "7.0.9");
 
-            modelBuilder.Entity("PartsInventoryConnector.Models.AppliancePart", b =>
+            modelBuilder.Entity("PartsInventoryConnector.Data.AppliancePart", b =>
                 {
                     b.Property<int>("PartNumber")
                         .ValueGeneratedOnAdd()
