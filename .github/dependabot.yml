@@ -1,0 +1,10 @@
+version: 2
+updates:
+  - package-ecosystem: "nuget"
+    directory: "/PartsInventoryConnector/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: /
+    scchedule:
+      interval: "weekly"
