@@ -1,6 +1,6 @@
 {
   "type": "AdaptiveCard",
-  "version": "1.0",
+  "version": "1.3",
   "body": [
     {
       "type": "ColumnSet",
@@ -11,18 +11,18 @@
           "items": [
             {
               "type": "TextBlock",
-              "text": "__{name} (Part #{partNumber})__",
+              "text": "__${name} (Part #${partNumber})__",
               "color": "accent",
               "size": "medium",
               "spacing": "none",
-              "$when": "{name != \"\"}"
+              "$when": "${name != \"\"}"
             },
             {
               "type": "TextBlock",
-              "text": "{description}",
+              "text": "${description}",
               "wrap": true,
               "maxLines": 3,
-              "$when": "{description != \"\"}"
+              "$when": "${description != \"\"}"
             }
           ],
           "horizontalAlignment": "Center",
@@ -37,17 +37,17 @@
               "facts": [
                 {
                   "title": "Price",
-                  "value": "{price}"
+                  "value": "$${price}"
                 },
                 {
                   "title": "Current Inventory",
-                  "value": "{inventory} units"
+                  "value": "${inventory} units"
                 }
               ]
             }
           ],
           "spacing": "none",
-          "horizontalAlignment": "Right"
+          "horizontalAlignment": "right"
         }
       ]
     }
