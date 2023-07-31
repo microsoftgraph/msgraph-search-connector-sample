@@ -1,41 +1,67 @@
-# Microsoft Graph connector Sample
+---
+page_type: sample
+description: This sample demonstrates how to use the Microsoft Graph .NET SDK to implement a custom search connector.
+products:
+- ms-graph
+- microsoft-graph-connectors-api
+- microsoft-search
+languages:
+- csharp
+---
 
-This .NET Core sample application demonstrates how to build a custom [Microsoft Graph connector](https://docs.microsoft.com/en-us/graph/connecting-external-content-connectors-overview) using Microsoft Graph APIs to index items from a sample applicance parts inventory, and have that data appear in [Microsoft Search](https://docs.microsoft.com/en-us/microsoftsearch/) results.
+# Microsoft Graph search connector sample
+
+[![dotnet build](https://github.com/microsoftgraph/msgraph-search-connector-sample/actions/workflows/dotnet.yml/badge.svg)](https://github.com/microsoftgraph/msgraph-search-connector-sample/actions/workflows/dotnet.yml) ![License.](https://img.shields.io/badge/license-MIT-green.svg)
+
+This .NET sample application demonstrates how to build a custom [Microsoft Graph connector](https://learn.microsoft.com/graph/connecting-external-content-connectors-overview) using Microsoft Graph APIs to index items from a sample appliance parts inventory, and have that data appear in [Microsoft Search](https://learn.microsoft.com/microsoftsearch/) results.
 
 ## Prerequisites
 
-- .NET 3.1 SDK
-- [Entity Framework Core Tools](https://docs.microsoft.com/ef/core/miscellaneous/cli/dotnet) (`dotnet tool install --global dotnet-ef`)
+- [.NET 7.x](https://dotnet.microsoft.com/download)
+- [Entity Framework Core Tools](https://learn.microsoft.com/ef/core/miscellaneous/cli/dotnet) (`dotnet tool install --global dotnet-ef`)
 - Some way to update a SQLite database. For example, the [DB Browser for SQLite](https://sqlitebrowser.org/).
 
 ## Register an app in Azure portal
 
-In this step you'll register an application in the Azure AD admin center. This is necessary to authenticate the application to make calls to the Microsoft Graph indexing API.
+In this step you will register an application that supports app-only authentication using [client credentials flow](/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow).
 
-1. Go to the [Azure Active Directory admin center](https://aad.portal.azure.com/) and sign in with an administrator account.
-1. Select **Azure Active Directory** in the left-hand pane, then select **App registrations** under **Manage**.
-1. Select **New registration**.
-1. Complete the **Register an application** form with the following values, then select **Register**.
+1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com) and login using a Global administrator account.
 
-    - **Name:** `Parts Inventory Connector`
-    - **Supported account types:** `Accounts in this organizational directory only (Microsoft only - Single tenant)`
-    - **Redirect URI:** Leave blank
+1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations** under **Manage**.
 
-1. On the **Parts Inventory Connector** page, copy the value of **Application (client) ID**, you'll need it in the next section.
-1. Copy the value of **Directory (tenant) ID**, you'll need it in the next section.
-1. Select **API Permissions** under **Manage**.
-1. Select **Add a permission**, then select **Microsoft Graph**.
-1. Select **Application permissions**, then select the **ExternalItem.ReadWrite.OwnedBy** permission. Select **Add permissions**.
-1. Select **Application permissions**, then select the **ExternalConnection.ReadWrite.OwnedBy** permission. Select **Add permissions**.
-1. Select **Grant admin consent for {TENANT}**, then select **Yes** when prompted.
-1. Select **Certificates & secrets** under **Manage**, then select **New client secret**.
-1. Enter a description and choose an expiration time for the secret, then select **Add**.
-1. Copy the new secret, you'll need it in the next section.
+1. Select **New registration**. Enter a name for your application, for example, `Parts Inventory Connector`.
+
+1. Set **Supported account types** to **Accounts in this organizational directory only**.
+
+1. Leave **Redirect URI** empty.
+
+1. Select **Register**. On the application's **Overview** page, copy the value of the **Application (client) ID** and **Directory (tenant) ID** and save them, you will need these values in the next step.
+
+1. Select **API permissions** under **Manage**.
+
+1. Remove the default **User.Read** permission under **Configured permissions** by selecting the ellipses (**...**) in its row and selecting **Remove permission**.
+
+1. Select **Add a permission**, then **Microsoft Graph**.
+
+1. Select **Application permissions**.
+
+1. Select **ExternalConnection.ReadWrite.OwnedBy** and **ExternalItem.ReadWrite.OwnedBy**, then select **Add permissions**.
+
+1. Select **Grant admin consent for...**, then select **Yes** to provide admin consent for the selected permission.
+
+1. Select **Certificates and secrets** under **Manage**, then select **New client secret**.
+
+1. Enter a description, choose a duration, and select **Add**.
+
+1. Copy the secret from the **Value** column, you will need it in the next steps.
+
+    > **IMPORTANT**
+    > This client secret is never shown again, so make sure you copy it now.
 
 ## Configure the app
 
 1. Open your command line interface (CLI) in the directory where **PartsInventoryConnector.csproj** is located.
-1. Run the following command to initialize [user secrets](https://docs.microsoft.com/aspnet/core/security/app-secrets) for the project.
+1. Run the following command to initialize [user secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) for the project.
 
     ```dotnetcli
     dotnet user-secrets init
@@ -44,9 +70,9 @@ In this step you'll register an application in the Azure AD admin center. This i
 1. Run the following commands to store your app ID, app secret, and tenant ID in the user secret store.
 
     ```dotnetcli
-    dotnet user-secrets set appId "YOUR_APP_ID_HERE"
-    dotnet user-secrets set appSecret "YOUR_APP_SECRET_HERE"
-    dotnet user-secrets set tenantId "YOUR_TENANT_ID_HERE"
+    dotnet user-secrets set settings:clientId <client-id>
+    dotnet user-secrets set settings:tenantId <tenant-id>
+    dotnet user-secrets set settings:clientSecret <client-secret>
     ```
 
 ## Initialize the database
@@ -78,15 +104,16 @@ In this step you'll build and run the sample. This will create a new connection,
 
 ## Create a vertical
 
-Create and enable a search vertical at the organization level following the instructions in [Manage Verticals] (https://docs.microsoft.com/en-us/microsoftsearch/manage-verticals).
+Create and enable a search vertical at the organization level following the instructions in [Manage Verticals](https://learn.microsoft.com/microsoftsearch/manage-verticals).
 
 - **Name:** Appliance Parts
 - **Content source:** the connector created with the app
 - **Add a query:** leave blank
+- **Filter:** none
 
 ## Create a result type
 
-Create a result type at the organization level following the instructions in [Manage Result Types] (https://docs.microsoft.com/en-us/microsoftsearch/manage-result-types).
+Create a result type at the organization level following the instructions in [Manage Result Types](https://learn.microsoft.com/microsoftsearch/manage-result-types).
 
 - **Name:** Appliance Part
 - **Content source:** the connector created with the app
@@ -106,6 +133,7 @@ In this step you'll search for parts in SharePoint.
 
 Use your favorite tool to update records in the database. The **Push updated items** menu choice will only push the items you update.
 
-> **NOTE:** Do not delete records from the database. To "delete" an item, set the IsDeleted property to 1.
+> **NOTE**
+> Do not delete records from the database. To "delete" an item, set the IsDeleted property to 1.
 >
 > ![DB Browser](images/dbbrowser.png)
