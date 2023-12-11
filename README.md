@@ -3,7 +3,6 @@ page_type: sample
 description: This sample demonstrates how to use the Microsoft Graph .NET SDK to implement a custom search connector.
 products:
 - ms-graph
-- microsoft-graph-connectors-api
 - microsoft-search
 languages:
 - csharp
