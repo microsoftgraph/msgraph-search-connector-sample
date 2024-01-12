@@ -89,7 +89,7 @@ dotnet ef database update
 
 ## Run the app
 
-In this step you'll build and run the sample. This will create a new connection, register the schema, then push items from the [ApplianceParts.csv](ApplianceParts.csv) file into the connection.
+In this step you'll build and run the sample. This will create a new connection, register the schema, then push items from the [ApplianceParts.csv](PartsInventoryConnector/ApplianceParts.csv) file into the connection.
 
 1. Open your command-line interface (CLI) in the **PartsInventoryConnector** directory.
 1. Use the `dotnet build` command to build the sample.
