@@ -16,7 +16,7 @@ This .NET sample application demonstrates how to build a custom [Microsoft Graph
 
 ## Prerequisites
 
-- [.NET 7.x](https://dotnet.microsoft.com/download)
+- [.NET 8.x](https://dotnet.microsoft.com/download)
 - [Entity Framework Core Tools](https://learn.microsoft.com/ef/core/miscellaneous/cli/dotnet) (`dotnet tool install --global dotnet-ef`)
 - Some way to update a SQLite database. For example, the [DB Browser for SQLite](https://sqlitebrowser.org/).
 
