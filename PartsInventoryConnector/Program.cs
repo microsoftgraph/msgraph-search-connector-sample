@@ -143,12 +143,19 @@ async Task<ExternalConnection?> CreateConnectionAsync()
         // Create the connection
         var connection = await GraphHelper.CreateConnectionAsync(
             connectionId, connectionName, connectionDescription);
-        Console.WriteLine($"New connection created - Name: {connection?.Name}, Id: {connection?.Id}");
+        Console.WriteLine(
+            "New connection created - Name: {0}, Id: {1}",
+            connection?.Name,
+            connection?.Id);
         return connection;
     }
     catch (ODataError odataError)
     {
-        Console.WriteLine($"Error creating connection: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+        Console.WriteLine(
+            "Error creating connection: {0}: {1} {2}",
+            odataError.ResponseStatusCode,
+            odataError.Error?.Code,
+            odataError.Error?.Message);
         return null;
     }
 }
@@ -162,7 +169,7 @@ async Task<ExternalConnection?> SelectExistingConnectionAsync()
     try
     {
         var response = await GraphHelper.GetExistingConnectionsAsync();
-        var connections = response?.Value ?? new List<ExternalConnection>();
+        var connections = response?.Value ?? [];
         if (connections.Count <= 0)
         {
             Console.WriteLine("No connections exist. Please create a new connection");
@@ -205,7 +212,11 @@ async Task<ExternalConnection?> SelectExistingConnectionAsync()
     }
     catch (ODataError odataError)
     {
-        Console.WriteLine($"Error getting connections: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+        Console.WriteLine(
+            "Error getting connections: {0}: {1} {2}",
+            odataError.ResponseStatusCode,
+            odataError.Error?.Code,
+            odataError.Error?.Message);
         return null;
     }
 }
@@ -228,7 +239,11 @@ async Task DeleteCurrentConnectionAsync(ExternalConnection? connection)
     }
     catch (ODataError odataError)
     {
-        Console.WriteLine($"Error deleting connection: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+        Console.WriteLine(
+            "Error deleting connection: {0}: {1} {2}",
+            odataError.ResponseStatusCode,
+            odataError.Error?.Code,
+            odataError.Error?.Message);
     }
 }
 // </DeleteConnectionSnippet>
@@ -238,7 +253,8 @@ async Task RegisterSchemaAsync()
 {
     if (currentConnection == null)
     {
-        Console.WriteLine("No connection selected. Please create a new connection or select an existing connection.");
+        Console.WriteLine(
+            "No connection selected. Please create a new connection or select an existing connection.");
         return;
     }
 
@@ -250,15 +266,15 @@ async Task RegisterSchemaAsync()
         var schema = new Schema
         {
             BaseType = "microsoft.graph.externalItem",
-            Properties = new List<Property>
-            {
-                new Property { Name = "partNumber", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
-                new Property { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = new List<Label?>() { Label.Title } },
-                new Property { Name = "description", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
-                new Property { Name = "price", Type = PropertyType.Double, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
-                new Property { Name = "inventory", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
-                new Property { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
-            },
+            Properties =
+            [
+                new() { Name = "partNumber", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
+                new() { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = [Label.Title] },
+                new() { Name = "description", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
+                new() { Name = "price", Type = PropertyType.Double, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
+                new() { Name = "inventory", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
+                new() { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
+            ],
         };
 
         await GraphHelper.RegisterSchemaAsync(currentConnection.Id, schema);
@@ -266,11 +282,18 @@ async Task RegisterSchemaAsync()
     }
     catch (ServiceException serviceException)
     {
-        Console.WriteLine($"Error registering schema: {serviceException.ResponseStatusCode} {serviceException.Message}");
+        Console.WriteLine(
+            "Error registering schema: {0} {1}",
+            serviceException.ResponseStatusCode,
+            serviceException.Message);
     }
     catch (ODataError odataError)
     {
-        Console.WriteLine($"Error registering schema: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+        Console.WriteLine(
+            "Error registering schema: {0}: {1} {2}",
+            odataError.ResponseStatusCode,
+            odataError.Error?.Code,
+            odataError.Error?.Message);
     }
 }
 // </RegisterSchemaSnippet>
@@ -280,7 +303,8 @@ async Task GetSchemaAsync()
 {
     if (currentConnection == null)
     {
-        Console.WriteLine("No connection selected. Please create a new connection or select an existing connection.");
+        Console.WriteLine(
+            "No connection selected. Please create a new connection or select an existing connection.");
         return;
     }
 
@@ -291,7 +315,11 @@ async Task GetSchemaAsync()
     }
     catch (ODataError odataError)
     {
-        Console.WriteLine($"Error getting schema: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+        Console.WriteLine(
+            "Error getting schema: {0}: {1} {2}",
+            odataError.ResponseStatusCode,
+            odataError.Error?.Code,
+            odataError.Error?.Message);
     }
 }
 // </GetSchemaSnippet>
@@ -301,7 +329,8 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
 {
     if (currentConnection == null)
     {
-        Console.WriteLine("No connection selected. Please create a new connection or select an existing connection.");
+        Console.WriteLine(
+            "No connection selected. Please create a new connection or select an existing connection.");
         return;
     }
 
@@ -348,20 +377,20 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
         var newItem = new ExternalItem
         {
             Id = part.PartNumber.ToString(),
-            Content = new ExternalItemContent
+            Content = new()
             {
                 Type = ExternalItemContentType.Text,
                 Value = part.Description,
             },
-            Acl = new List<Acl>
-            {
-                new Acl
+            Acl =
+            [
+                new()
                 {
                     AccessType = AccessType.Grant,
                     Type = AclType.Everyone,
                     Value = tenantId,
                 },
-            },
+            ],
             Properties = part.AsExternalItemProperties(),
         };
 
@@ -375,7 +404,11 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
         {
             success = false;
             Console.WriteLine("FAILED");
-            Console.WriteLine($"Error: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+            Console.WriteLine(
+                "Error: {0}: {1} {2}",
+                odataError.ResponseStatusCode,
+                odataError.Error?.Code,
+                odataError.Error?.Message);
         }
     }
 
@@ -391,7 +424,11 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
         {
             success = false;
             Console.WriteLine("FAILED");
-            Console.WriteLine($"Error: {odataError.ResponseStatusCode}: {odataError.Error?.Code} {odataError.Error?.Message}");
+            Console.WriteLine(
+                "Error: {0}: {1} {2}",
+                odataError.ResponseStatusCode,
+                odataError.Error?.Code,
+                odataError.Error?.Message);
         }
     }
 
