@@ -3,6 +3,7 @@
 
 // <ProgramSnippet>
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Graph;
 using Microsoft.Graph.Models.ExternalConnectors;
@@ -79,9 +80,11 @@ while (choice != 0)
     }
 }
 
-static string? PromptForInput(string prompt, bool valueRequired)
+static string? PromptForInput(string prompt, bool valueRequired, bool alphaNumericOnly = false)
 {
     string? response;
+
+    Regex alphaNumericRegex = new("^[a-zA-Z0-9]+$");
 
     do
     {
@@ -90,6 +93,13 @@ static string? PromptForInput(string prompt, bool valueRequired)
         if (valueRequired && string.IsNullOrEmpty(response))
         {
             Console.WriteLine("You must provide a value");
+        }
+
+        var isAlphaNumeric = alphaNumericRegex.IsMatch(response ?? string.Empty);
+        if (alphaNumericOnly && !isAlphaNumeric)
+        {
+            Console.WriteLine("Value must contain numbers and letters only");
+            response = null;
         }
     }
     while (valueRequired && string.IsNullOrEmpty(response));
@@ -132,11 +142,15 @@ void InitializeGraph(Settings settings)
 async Task<ExternalConnection?> CreateConnectionAsync()
 {
     var connectionId = PromptForInput(
-        "Enter a unique ID for the new connection (3-32 characters)", true) ?? "ConnectionId";
+        "Enter a unique ID for the new connection (3-32 characters, alphanumeric only)",
+        valueRequired: true,
+        alphaNumericOnly: true) ?? "ConnectionId";
     var connectionName = PromptForInput(
-        "Enter a name for the new connection", true) ?? "ConnectionName";
+        "Enter a name for the new connection",
+        valueRequired: true) ?? "ConnectionName";
     var connectionDescription = PromptForInput(
-        "Enter a description for the new connection", false);
+        "Enter a description for the new connection",
+        valueRequired: false);
 
     try
     {
