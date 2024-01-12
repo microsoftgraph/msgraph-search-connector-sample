@@ -15,10 +15,15 @@ public class AppliancePart
 
     [Key]
     public int PartNumber { get; set; }
+
     public string? Name { get; set; }
+
     public string? Description { get; set; }
+
     public double Price { get; set; }
+
     public int Inventory { get; set; }
+
     public List<string>? Appliances { get; set; }
 
     public Properties AsExternalItemProperties()
@@ -37,8 +42,8 @@ public class AppliancePart
                 { "price", Price },
                 { "inventory", Inventory },
                 { "appliances@odata.type", "Collection(String)" },
-                { "appliances", Appliances }
-            }
+                { "appliances", Appliances },
+            },
         };
 
         return properties;

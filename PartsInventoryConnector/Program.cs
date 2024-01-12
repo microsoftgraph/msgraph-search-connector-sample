@@ -1,5 +1,5 @@
 ﻿// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT license.
+// Licensed under the MIT License.
 
 // <ProgramSnippet>
 using System.Text.Json;
@@ -45,7 +45,7 @@ while (choice != 0)
         choice = -1;
     }
 
-    switch(choice)
+    switch (choice)
     {
         case 0:
             // Exit the program
@@ -91,7 +91,8 @@ static string? PromptForInput(string prompt, bool valueRequired)
         {
             Console.WriteLine("You must provide a value");
         }
-    } while (valueRequired && string.IsNullOrEmpty(response));
+    }
+    while (valueRequired && string.IsNullOrEmpty(response));
 
     return response;
 }
@@ -171,7 +172,7 @@ async Task<ExternalConnection?> SelectExistingConnectionAsync()
         // Display connections
         Console.WriteLine("Choose one of the following connections:");
         var menuNumber = 1;
-        foreach(var connection in connections)
+        foreach (var connection in connections)
         {
             Console.WriteLine($"{menuNumber++}. {connection.Name}");
         }
@@ -197,7 +198,8 @@ async Task<ExternalConnection?> SelectExistingConnectionAsync()
             {
                 Console.WriteLine("Invalid choice.");
             }
-        } while (selection == null);
+        }
+        while (selection == null);
 
         return selection;
     }
@@ -251,11 +253,11 @@ async Task RegisterSchemaAsync()
             Properties = new List<Property>
             {
                 new Property { Name = "partNumber", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
-                new Property { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = new List<Label?>() { Label.Title }},
+                new Property { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = new List<Label?>() { Label.Title } },
                 new Property { Name = "description", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
                 new Property { Name = "price", Type = PropertyType.Double, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
                 new Property { Name = "inventory", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
-                new Property { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false }
+                new Property { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
             },
         };
 
@@ -286,7 +288,6 @@ async Task GetSchemaAsync()
     {
         var schema = await GraphHelper.GetSchemaAsync(currentConnection.Id);
         Console.WriteLine(JsonSerializer.Serialize(schema));
-
     }
     catch (ODataError odataError)
     {
@@ -350,7 +351,7 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
             Content = new ExternalItemContent
             {
                 Type = ExternalItemContentType.Text,
-                Value = part.Description
+                Value = part.Description,
             },
             Acl = new List<Acl>
             {
@@ -359,7 +360,7 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
                     AccessType = AccessType.Grant,
                     Type = AclType.Everyone,
                     Value = tenantId,
-                }
+                },
             },
             Properties = part.AsExternalItemProperties(),
         };

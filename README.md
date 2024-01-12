@@ -77,6 +77,7 @@ In this step you will register an application that supports app-only authenticat
 ## Initialize the database
 
 ```dotnetcli
+dotnet ef migrations add InitialCreate
 dotnet ef database update
 ```
 

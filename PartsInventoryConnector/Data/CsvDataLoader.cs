@@ -25,7 +25,7 @@ public class ApplianceListConverter : DefaultTypeConverter
 {
     public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
-        var appliances = text?.Split(';') ?? Array.Empty<string>();
+        var appliances = text?.Split(';') ?? [];
         return new List<string>(appliances);
     }
 }

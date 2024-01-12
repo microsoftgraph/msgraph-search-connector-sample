@@ -25,6 +25,22 @@ public class ApplianceDbContext : DbContext
         }
     }
 
+    public override int SaveChanges()
+    {
+        // Prevent deletes of data, instead mark the item as deleted
+        // by setting IsDeleted = true.
+        foreach (var entry in ChangeTracker.Entries()
+            .Where(e => e.State == EntityState.Deleted))
+        {
+            if (entry.Entity.GetType() == typeof(AppliancePart))
+            {
+                SoftDelete(entry);
+            }
+        }
+
+        return base.SaveChanges();
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
         options.UseSqlite("Data Source=parts.db");
@@ -38,8 +54,7 @@ public class ApplianceDbContext : DbContext
             .Property(ap => ap.Appliances)
             .HasConversion(
                 v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
-                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default)
-            );
+                v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default));
 
         // Add LastUpdated and IsDeleted shadow properties
         modelBuilder.Entity<AppliancePart>()
@@ -57,26 +72,10 @@ public class ApplianceDbContext : DbContext
             .HasQueryFilter(a => !EF.Property<bool>(a, "IsDeleted"));
     }
 
-    public override int SaveChanges()
-    {
-        // Prevent deletes of data, instead mark the item as deleted
-        // by setting IsDeleted = true.
-        foreach(var entry in ChangeTracker.Entries()
-            .Where(e => e.State == EntityState.Deleted))
-        {
-            if (entry.Entity.GetType() == typeof(AppliancePart))
-            {
-                SoftDelete(entry);
-            }
-
-        }
-
-        return base.SaveChanges();
-    }
-
     private void SoftDelete(EntityEntry entry)
     {
-        var partNumber = new SqliteParameter("@partNumber",
+        var partNumber = new SqliteParameter(
+            "@partNumber",
             entry.OriginalValues["PartNumber"]);
 
         Database.ExecuteSqlRaw(

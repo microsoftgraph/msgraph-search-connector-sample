@@ -5,4 +5,15 @@ insert_final_newline = true
 
 [*.{cs,cshtml}]
 indent_size = 4
+dotnet_diagnostic.CS1591.severity = silent
 dotnet_diagnostic.SA1101.severity = silent
+dotnet_diagnostic.SA1402.severity = silent
+dotnet_diagnostic.SA1512.severity = silent
+dotnet_diagnostic.SA1513.severity = silent
+dotnet_diagnostic.SA1514.severity = silent
+dotnet_diagnostic.SA1515.severity = silent
+dotnet_diagnostic.SA1600.severity = silent
+
+[PartsInventoryConnector/Migrations/*.cs]
+dotnet_diagnostic.SA1413.severity = silent
+dotnet_diagnostic.SA1633.severity = silent

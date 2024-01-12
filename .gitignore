@@ -6,5 +6,4 @@ parts.db-shm
 parts.db-wal
 lastuploadtime.bin
 
-OLD/
 Migrations/
