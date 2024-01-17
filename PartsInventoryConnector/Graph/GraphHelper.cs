@@ -137,6 +137,7 @@ public static class GraphHelper
     }
     // </AddOrUpdateItemSnippet>
 
+    // <AddActivitiesToItemSnippet>
     public static async Task AddActivitiesToItemAsync(
         string? connectionId,
         string? itemId,
@@ -158,6 +159,7 @@ public static class GraphHelper
                 });
         }
     }
+    // </AddActivitiesToItemSnippet>
 
     // <DeleteItemSnippet>
     public static async Task DeleteItemAsync(string? connectionId, string? itemId)
