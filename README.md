@@ -24,9 +24,9 @@ This .NET sample application demonstrates how to build a custom [Microsoft Graph
 
 In this step you will register an application that supports app-only authentication using [client credentials flow](/azure/active-directory/develop/v2-oauth2-client-creds-grant-flow).
 
-1. Open a browser and navigate to the [Azure Active Directory admin center](https://aad.portal.azure.com) and login using a Global administrator account.
+1. Open a browser and navigate to the [Entra admin center](https://entra.microsoft.com) and login using a Global administrator account.
 
-1. Select **Azure Active Directory** in the left-hand navigation, then select **App registrations** under **Manage**.
+1. Select **Identity** in the left-hand navigation, then select **App registrations** under **Applications**.
 
 1. Select **New registration**. Enter a name for your application, for example, `Parts Inventory Connector`.
 
@@ -114,13 +114,16 @@ Add results from the connector in the **All** vertical in Microsoft Search. For 
 
 In this step you'll search for parts in SharePoint.
 
+> [!NOTE]
+> It may take a few minutes before results from the connector show up in search.
+
 1. Open [Office.com](https://www.office.com/) and sign in.
 1. Using the search box at the top of the page, search for `hinge`.
 1. Results from the connector are displayed.
 
 ## Updating records in the database
 
-Use your favorite tool to update records in the database. The **Push updated items** menu choice will only push the items you update.
+Use your favorite tool to update records in the database. The **Push updated items** menu choice will only push the items you update the **LastUpdated** field to a date and time later than the last time you uploaded items.
 
 > **NOTE**
 > Do not delete records from the database. To "delete" an item, set the IsDeleted property to 1.
