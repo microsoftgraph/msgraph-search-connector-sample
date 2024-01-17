@@ -44,7 +44,7 @@ In this step you will register an application that supports app-only authenticat
 
 1. Select **Application permissions**.
 
-1. Select **ExternalConnection.ReadWrite.OwnedBy** and **ExternalItem.ReadWrite.OwnedBy**, then select **Add permissions**.
+1. Select **ExternalConnection.ReadWrite.OwnedBy**, **ExternalItem.ReadWrite.OwnedBy**, and **User.Read.All**, then select **Add permissions**.
 
 1. Select **Grant admin consent for...**, then select **Yes** to provide admin consent for the selected permission.
 
@@ -102,31 +102,20 @@ In this step you'll build and run the sample. This will create a new connection,
 
 1. Select the **6. Push updated items to current connection** option.
 
-## Create a vertical
+## Include connector results in "All" vertical
 
-Create and enable a search vertical at the organization level following the instructions in [Manage Verticals](https://learn.microsoft.com/microsoftsearch/manage-verticals).
+Add results from the connector in the **All** vertical in Microsoft Search. For details, see [Manage connector results in All vertical](https://learn.microsoft.com/microsoftsearch/connectors-in-all-vertical).
 
-- **Name:** Appliance Parts
-- **Content source:** the connector created with the app
-- **Add a query:** leave blank
-- **Filter:** none
-
-## Create a result type
-
-Create a result type at the organization level following the instructions in [Manage Result Types](https://learn.microsoft.com/microsoftsearch/manage-result-types).
-
-- **Name:** Appliance Part
-- **Content source:** the connector created with the app
-- **Rules:** None
-- Paste contents of [result-type.json](result-type.json) into layout
+1. Open the [Microsoft admin center](https://admin.microsoft.com/) and go to **Settings**, **Search & intelligence**, **Customizations**, **Verticals**.
+1. Select the **All** vertical, then **Manage connector results**.
+1. Enable the connector you created in the previous step, then select **Save**.
 
 ## Search for results
 
 In this step you'll search for parts in SharePoint.
 
-1. Go to your root SharePoint site for your tenant.
+1. Open [Office.com](https://www.office.com/) and sign in.
 1. Using the search box at the top of the page, search for `hinge`.
-1. When the search completes with 0 results, select the **Appliance Parts** tab.
 1. Results from the connector are displayed.
 
 ## Updating records in the database

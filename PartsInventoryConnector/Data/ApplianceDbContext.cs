@@ -56,11 +56,17 @@ public class ApplianceDbContext : DbContext
                 v => JsonSerializer.Serialize(v, JsonSerializerOptions.Default),
                 v => JsonSerializer.Deserialize<List<string>>(v, JsonSerializerOptions.Default));
 
-        // Add LastUpdated and IsDeleted shadow properties
+        // Set created and last updated automatically
+        modelBuilder.Entity<AppliancePart>()
+            .Property<DateTime>("Created")
+            .HasDefaultValueSql("datetime()")
+            .ValueGeneratedOnAdd();
         modelBuilder.Entity<AppliancePart>()
             .Property<DateTime>("LastUpdated")
             .HasDefaultValueSql("datetime()")
             .ValueGeneratedOnAddOrUpdate();
+
+        // Add IsDeleted shadow property
         modelBuilder.Entity<AppliancePart>()
             .Property<bool>("IsDeleted")
             .IsRequired()

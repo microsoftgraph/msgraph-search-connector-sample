@@ -7,11 +7,25 @@
       "columns": [
         {
           "type": "Column",
-          "width": 6,
+          "width": "auto",
+          "horizontalAlignment": "center",
+          "verticalContentAlignment": "center",
+          "items": [
+            {
+              "type": "Image",
+              "url": "${icon}",
+              "size": "medium",
+              "altText": "Product image"
+            }
+          ]
+        },
+        {
+          "type": "Column",
+          "width": 50,
           "items": [
             {
               "type": "TextBlock",
-              "text": "__${name} (Part #${partNumber})__",
+              "text": "[${name} (Part #${partNumber})](${productUrl})",
               "color": "accent",
               "size": "medium",
               "spacing": "none",
@@ -25,12 +39,11 @@
               "$when": "${description != \"\"}"
             }
           ],
-          "horizontalAlignment": "Center",
-          "spacing": "none"
+          "horizontalAlignment": "left"
         },
         {
           "type": "Column",
-          "width": 2,
+          "width": "auto",
           "items": [
             {
               "type": "FactSet",

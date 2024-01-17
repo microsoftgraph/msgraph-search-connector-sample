@@ -26,6 +26,10 @@ public class AppliancePart
 
     public List<string>? Appliances { get; set; }
 
+    public DateTime Created { get; set; }
+
+    public DateTime LastUpdated { get; set; }
+
     public Properties AsExternalItemProperties()
     {
         _ = Name ?? throw new MemberAccessException("Name cannot be null");
@@ -41,8 +45,12 @@ public class AppliancePart
                 { "description", Description },
                 { "price", Price },
                 { "inventory", Inventory },
-                { "appliances@odata.type", "Collection(String)" },
+                { "appliances@odata.type", AppliancesODataType },
                 { "appliances", Appliances },
+                { "icon", $"https://microsoftgraph.github.io/msgraph-search-connector-sample/images/{PartNumber}.png" },
+                { "productUrl", $"https://microsoftgraph.github.io/msgraph-search-connector-sample/{PartNumber}" },
+                { "created", Created },
+                { "lastUpdated", LastUpdated },
             },
         };
 

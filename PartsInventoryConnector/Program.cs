@@ -282,12 +282,16 @@ async Task RegisterSchemaAsync()
             BaseType = "microsoft.graph.externalItem",
             Properties =
             [
-                new() { Name = "partNumber", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
+                new() { Name = "partNumber", Aliases = ["number", "id"], Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
                 new() { Name = "name", Type = PropertyType.String, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = [Label.Title] },
                 new() { Name = "description", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
                 new() { Name = "price", Type = PropertyType.Double, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
                 new() { Name = "inventory", Type = PropertyType.Int64, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true },
                 new() { Name = "appliances", Type = PropertyType.StringCollection, IsQueryable = true, IsSearchable = true, IsRetrievable = true, IsRefinable = false },
+                new() { Name = "icon", Type = PropertyType.String, IsQueryable = false, IsSearchable = false, IsRetrievable = true, IsRefinable = false, Labels = [Label.IconUrl] },
+                new() { Name = "productUrl", Type = PropertyType.String, IsQueryable = false, IsSearchable = true, IsRetrievable = true, IsRefinable = false, Labels = [Label.Url] },
+                new() { Name = "created", Type = PropertyType.DateTime, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true, Labels = [Label.CreatedDateTime] },
+                new() { Name = "lastUpdated", Type = PropertyType.DateTime, IsQueryable = true, IsSearchable = false, IsRetrievable = true, IsRefinable = true, Labels = [Label.LastModifiedDateTime] },
             ],
         };
 
@@ -406,12 +410,40 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
                 },
             ],
             Properties = part.AsExternalItemProperties(),
+            Activities =
+            [
+                new()
+                {
+                    Type = ExternalActivityType.Created,
+                    StartDateTime = part.Created,
+                    PerformedBy = new()
+                    {
+                        Type = IdentityType.User,
+                        Id = await GraphHelper.GetActivityUserAsync(),
+                    },
+                },
+            ],
         };
 
         try
         {
             Console.Write($"Uploading part number {part.PartNumber}...");
             await GraphHelper.AddOrUpdateItemAsync(currentConnection.Id, newItem);
+            await GraphHelper.AddActivitiesToItemAsync(
+                currentConnection.Id,
+                newItem.Id,
+                [
+                    new()
+                    {
+                        Type = ExternalActivityType.Modified,
+                        StartDateTime = DateTimeOffset.UtcNow,
+                        PerformedBy = new()
+                        {
+                            Type = IdentityType.User,
+                            Id = await GraphHelper.GetActivityUserAsync(),
+                        },
+                    },
+                ]);
             Console.WriteLine("DONE");
         }
         catch (ODataError odataError)
