@@ -414,6 +414,7 @@ async Task UpdateItemsFromDatabaseAsync(bool uploadModifiedOnly, string? tenantI
             [
                 new()
                 {
+                    OdataType = "#microsoft.graph.externalConnectors.externalActivity",
                     Type = ExternalActivityType.Created,
                     StartDateTime = part.Created,
                     PerformedBy = new()

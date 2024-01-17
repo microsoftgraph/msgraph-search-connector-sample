@@ -83,6 +83,13 @@ public static class GraphHelper
 
         return await graphClient.External.Connections.PostAsync(newConnection);
     }
+
+    public static async Task<Dictionary<string, object>> GetResultTemplateAsync(string resultCardJsonFile)
+    {
+        var fileContents = await File.ReadAllTextAsync(resultCardJsonFile);
+        return JsonSerializer.Deserialize<Dictionary<string, object>>(fileContents) ??
+            throw new Exception($"Could not deserialize contents of {resultCardJsonFile}");
+    }
     // </CreateConnectionSnippet>
 
     // <GetConnectionsSnippet>
@@ -235,10 +242,12 @@ public static class GraphHelper
                 throw new ServiceException("Schema registration timed out while checking for status.");
             }
 
+            Console.Write("Checking status of schema registration...");
             var operation = await graphClient.External
                 .Connections[connectionId]
                 .Operations[operationId]
                 .GetAsync();
+            Console.WriteLine(operation?.Status);
 
             if (operation?.Status == ConnectionOperationStatus.Completed)
             {
@@ -256,11 +265,4 @@ public static class GraphHelper
         while (true);
     }
     // </RegisterSchemaSnippet>
-
-    private static async Task<Dictionary<string, object>> GetResultTemplateAsync(string resultCardJsonFile)
-    {
-        var fileContents = await File.ReadAllTextAsync(resultCardJsonFile);
-        return JsonSerializer.Deserialize<Dictionary<string, object>>(fileContents) ??
-            throw new Exception($"Could not deserialize contents of {resultCardJsonFile}");
-    }
 }
